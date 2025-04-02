@@ -1,0 +1,138 @@
+---
+title: "Class Notes 3/28"
+format: html
+embed-resources: true
+---
+
+```{r}
+#| label: setup
+#| message: false
+
+library(tidyverse)
+library(gt)
+library(readxl)
+library(modeldata)
+
+pokemon <- read_csv("pokemon.csv")
+trout <- read_excel("trout.xlsx")
+```
+
+
+## Git
+
+We talked about branches a bit.
+
+## Anova
+
+We'll use the pokemon data set
+
+Null: the mean HP is the same for each generation (independence)
+Alternate: The mean HP is different for atleast 1 generation (dependence)
+
+```{r}
+ggplot(pokemon, aes(
+  x = hp,
+  y = as.factor(generation)
+)) +
+  geom_boxplot()
+```
+
+
+```{r}
+pokemon <- pokemon %>% 
+  mutate(generation = as.factor(generation))
+
+aov(pokemon$hp ~ pokemon$generation)
+```
+
+to see p-value save output then get a summary
+
+```{r}
+model <- aov(hp ~ generation,
+             data = pokemon)
+
+summary(model)
+```
+
+it appears that generation does not inform HP, pvalue of .088 is too bign
+
+#example 2 - trout
+
+```{r}
+glimpse(trout)
+```
+
+
+```{r}
+trout <- trout %>% 
+  mutate(Location = as.factor(Location))
+
+ggplot(trout,
+       aes(x = Location,
+           y = Hemo)) +
+  geom_boxplot() +
+  geom_jitter()
+```
+
+```{r}
+model <- aov(Hemo ~ Location,
+             data = trout)
+summary(model)
+```
+
+tiny pvalue tells us that hemo is informed by location.
+
+(last thing today was committing to git repo)
+
+## Class Notes 4/2
+
+if the anova leads to rejecting the null, we can consider pair-wise comparisons of the groups. HOWEVER, we have to be honest about the fact that there are many possible comparisons. 
+
+one way to do this is the *Tukey Honest Standard Differences Test*
+
+```{r}
+TukeyHSD(model)
+```
+
+## Comparing two quantitative variables:
+
+```{r}
+glimpse(crickets)
+```
+
+null: `rate` is indenpendent of `temp`
+
+alt: `rate` is not independent of `temp`
+
+we'll test for a linear dependence - regression
+
+```{r}
+ggplot(crickets,
+       aes(x = temp,
+           y = rate)) +
+  geom_point() +
+  geom_smooth(method = "lm",
+              se = FALSE)
+```
+
+more specific:
+
+null: the slope is zero in the population in which we are sampling
+
+alternative: the slope is non-zero
+
+test:
+
+```{r}
+lm(rate ~ temp,
+   data = crickets) # rate explained by temp ?
+```
+the equation of the regression line is rate = -27.948 + 4.23(temp)
+
+```{r}
+model1 <- lm(rate ~ temp,
+   data = crickets)
+
+summary(model1)
+```
+pvalue is roughly 0, reject null - rate is dependent on temp.

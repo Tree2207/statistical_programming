@@ -1,0 +1,89 @@
+---
+title: "Class Notes 3/28"
+format: html
+embed-resources: true
+---
+
+```{r}
+#| label: setup
+#| message: false
+
+library(tidyverse)
+library(gt)
+library(readxl)
+
+pokemon <- read_csv("pokemon.csv")
+trout <- read_excel("trout.xlsx")
+```
+
+
+## Git
+
+We talked about branches a bit.
+
+## Anova
+
+We'll use the pokemon data set
+
+Null: the mean HP is the same for each generation (independence)
+Alternate: The mean HP is different for atleast 1 generation (dependence)
+
+```{r}
+ggplot(pokemon, aes(
+  x = hp,
+  y = as.factor(generation)
+)) +
+  geom_boxplot()
+```
+
+
+```{r}
+pokemon <- pokemon %>% 
+  mutate(generation = as.factor(generation))
+
+aov(pokemon$hp ~ pokemon$generation)
+```
+
+to see p-value save output then get a summary
+
+```{r}
+model <- aov(hp ~ generation,
+             data = pokemon)
+
+summary(model)
+```
+
+it appears that generation does not inform HP, pvalue of .088 is too bign
+
+#example 2 - trout
+
+```{r}
+glimpse(trout)
+```
+
+
+```{r}
+trout <- trout %>% 
+  mutate(Location = as.factor(Location))
+
+ggplot(trout,
+       aes(x = Location,
+           y = Hemo)) +
+  geom_boxplot() +
+  geom_jitter()
+```
+
+```{r}
+model <- aov(Hemo ~ Location,
+             data = trout)
+summary(model)
+```
+
+tiny pvalue tells us that hemo is informed by location.
+
+(last thing today was committing to git repo)
+
+## Class Notes 4/2
+
+
+
