@@ -31,5 +31,16 @@ ggplot(airquality,
   geom_smooth(method = "lm", se = FALSE)
 ```
 
+```{r}
+model <- lm(Temp ~ Wind,
+            data = airquality)
 
+summary(model)
+```
+
+pvalue is basically 0, indicates strong evidence for the alternative, Temp and Wind are not independent. 
+
+# Regression from the practical perspective
+
+lets leave inference aside for a moment
 
