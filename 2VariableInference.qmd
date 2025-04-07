@@ -1,0 +1,162 @@
+---
+title: "2 Variable Inference"
+format: html
+embed-resources: true
+---
+
+```{r}
+#| label: setup
+#| message: false
+
+library(tidyverse)
+library(gt)
+library(readxl)
+library(modeldata)
+```
+
+## Question 1:
+
+Null (Ho): Mean bill length is the same across species
+
+Alternative (Ha): mean bill length is not the same across species
+
+```{r}
+#| warning: false
+#| fig-alt: boxplot showing the different quartiles and averages of bill length across species.
+ggplot(penguins,
+       aes(x = species,
+           y = bill_length_mm,
+           fill = species)) +
+  geom_boxplot() +
+  scale_fill_brewer(palette = "Dark2")
+```
+
+```{r}
+bill_model <- aov(bill_length_mm ~ species,
+                  data = penguins)
+
+summary(bill_model)
+```
+
+Extremely statistically significant Pvalue, so we reject the null, and conclude beyond a resonable doubt that they do not have the same average bill length 
+
+```{r}
+bill_tukey <- TukeyHSD(bill_model)
+bill_tukey
+```
+
+All three penguin species differ significantly in average bill length. all pvalues extremely small.
+
+## Question 2:
+
+Null (Ho): Sex and species are independent (i.e., each species has the same male/female proportions).
+
+Alternative (Ha): Sex and species are not independent (i.e., proportions differ by species)
+
+```{r}
+#| fig-alt: bar chart that shows proportions of male and female birds across species. 
+ggplot(penguins,
+       aes(x = species,
+           fill = sex,
+           )) +
+  geom_bar(position = "fill") +
+    scale_fill_brewer(palette = "Dark2")
+```
+
+```{r}
+penguin_sex <- table(penguins$sex,
+                     penguins$species)
+
+chisq.test(penguin_sex)
+```
+
+pvalue is vey large, so we can conclude that sex and species are independent of each other. 
+
+## Question 3:
+
+Null (Ho): Mean body mass is the same across sexes
+
+Alternative (Ha): mean body mass is not the same across sexes
+
+```{r}
+#| fig-alt: boxplot showing quartiles and averages of body mass across bird sexes
+penguins <- penguins %>% 
+  filter(!is.na(body_mass_g), !is.na(sex))
+
+#| warning: false
+ggplot(penguins,
+       aes(x = sex,
+           y = body_mass_g,
+           fill = sex)) +
+  geom_boxplot() +
+  scale_fill_brewer(palette = "Dark2")
+```
+
+```{r}
+sex_t_test <- t.test(body_mass_g ~ sex, 
+                     data = penguins)
+
+sex_t_test
+```
+
+pvalue is about as close to 0 as you can get, so we reject Ho and conclude that mean body mass is not the same across sexes
+
+## Question 4
+
+Null (Ho): Bill length and bill depth are independent
+
+Alternative (Ha): Bill length and bill depth are not independent
+
+```{r}
+#| fig-alt: scatter plot and regresion highlighting correlations of bill length and bill depths
+#| warning: false
+gentoo <- penguins %>% 
+  filter(species == "Gentoo", 
+         !is.na(bill_length_mm),
+         !is.na(bill_depth_mm))
+
+ggplot(gentoo,
+       aes(x = bill_length_mm,
+           y = bill_depth_mm)) +
+  geom_point() +
+  geom_smooth(method = "lm", se = FALSE)
+```
+
+```{r}
+lm(bill_depth_mm ~ bill_length_mm,
+   data = gentoo)
+```
+
+Equation is 5.1210 + .2076*(bill_length_mm)
+
+
+```{r}
+bill_model_2 <- lm(bill_depth_mm ~ bill_length_mm,
+   data = gentoo)
+
+summary(bill_model_2)
+```
+
+pvalue basically 0, is statistically significant, reject Ho
+
+## Question 5:
+
+```{r}
+#| fig-alt: multiple scatter plots and regressions highliting correlation of bill length and depth across all 3 species seperately
+penguins_clean <- penguins |>
+  filter(!is.na(bill_length_mm), !is.na(bill_depth_mm), !is.na(species))
+
+ggplot(penguins_clean, aes(x = bill_length_mm, y = bill_depth_mm, color = species)) +
+  geom_point(alpha = 0.7) +
+  geom_smooth(method = "lm", se = FALSE) +
+  scale_color_brewer(palette = "Dark2")
+```
+
+```{r}
+lm_species_model <- lm(bill_depth_mm ~ bill_length_mm * species, data = penguins)
+summary(lm_species_model)
+```
+
+Not exactly sure how to interpre this data. 
+
+
