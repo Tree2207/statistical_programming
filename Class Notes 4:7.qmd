@@ -1,0 +1,35 @@
+---
+title: "Class Notes 4/7"
+format: html
+embed-resources: true
+---
+
+
+```{r}
+#| label: setup
+#| message: false
+
+library(tidyverse)
+library(broom)
+```
+
+lets look at airquality first: are wind and temp independent
+
+```{r}
+glimpse(airquality)
+```
+
+null: wind and temp are independent - slope of regression line is 0. 
+
+alternative: not independent - slope is nonzero
+
+```{r}
+ggplot(airquality,
+       aes(x = Wind,
+           y = Temp)) +
+  geom_point() +
+  geom_smooth(method = "lm", se = FALSE)
+```
+
+
+
