@@ -1,0 +1,85 @@
+---
+title: "class notes 4.7"
+format: html
+embed-resources: true
+---
+
+```{r}
+#| message: false
+
+library(tidyverse)
+library(broom)
+```
+
+Let's look at the `airquality` data set. First of all, are wind and temp independent?
+
+```{r}
+glimpse(airquality)
+```
+
+Null: wind and temp are independent. The slope of the regression line is zero in the population from which the sample is taken.
+
+Alternative: they're not independent. The slope in the population is nonzero.
+
+```{r}
+#| fig-alt: a scatterplot showing the relation between wind and temp in the airquality data set. There appears to be a negative relation.
+
+ggplot(airquality, 
+       aes(x = Wind,
+           y = Temp)) +
+  geom_point() +
+  geom_smooth(method = "lm",
+              se = FALSE)
+```
+
+Now let's run the test.
+
+```{r}
+model <- lm(Temp ~ Wind, 
+            data = airquality)
+summary(model)
+```
+
+The p-value (2.64 x 10^-9) indicates strong evidence against the null. We conclude that temp and wind are not independent. Knowing wind helps us guess temp.
+
+## Regression from the practical perspective
+
+Let's leave inference aside for a bit. Once we have a model, we can compute predicted (or fitted) values and also residuals. 
+
+- fitted (predicted) values are obtained by plugging in to the regression equation.
+
+- residuals are the difference between observed and expected values.
+
+For observation 113, which has wind=15.5 and temp=77, the fitted value is `{r} 90.1359 - 1.2305 * 15.5`. (note my use of inline code here).
+
+The residual of this point is (obs - exp) = `{r} 77 - (90.1359 - 1.2305 * 15.5)`. That day was almost 6 degrees warmer than the model suggested.
+
+We can extract all fitted values and all residuals at once:
+
+```{r}
+fitted.values(model)[1:10] # first 10
+residuals(model)[1:10]
+```
+
+The `broom::augment` does all this in a tidy manner.
+
+```{r}
+airq_aug <- augment(model)
+glimpse(airq_aug)
+```
+
+
+## Class Notes 4/9: Model Diagnostics
+
+- there is a linear relationship between the variables.
+- the observations are independent of each other.
+- residuals should have a normal distribution
+- variance of said normal distribution should be the same for every x value
+
+after making a regression model its pretty crucial to check these things, to make sure test is homoskedastic, among other things.
+
+
+
+
+
+
