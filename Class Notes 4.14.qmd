@@ -68,4 +68,18 @@ model_sm <- lm(y ~ x1,
 model_sm
 ```
 
+its ok to build multiple models and then choose between them. **BUT** if you do this, do not do hypothesis testing, those p-values are no longer useful.
+
+multiple variables:
+
+```{r}
+ggplot(data_sm,
+       aes(x = x2,
+           y = y)) +
+  geom_point() + 
+  geom_smooth(method = "lm",
+              se = FALSE)
+```
+
+$$y = \beta_0 + \beta_1x_1 + \beta_2x_2$$
 
