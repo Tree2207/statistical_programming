@@ -1,0 +1,212 @@
+---
+title: "Math250MidtermDos"
+format: html
+embed-resources: true
+---
+
+```{r}
+#| message: false
+#| label: setup
+library(tidyverse)
+library(readxl)
+library(gt)
+
+pizza_poll <- read_excel("pizza_poll.xlsx")
+pizza_ratings <- read_excel("pizza_ratings.xlsx")
+spotify <- read_csv("spotify_sample.csv")
+scooby <- read_excel("scooby copy.xlsx")
+```
+
+## Problem 1
+
+```{r}
+rating <- c("Excellent" = 5, "Good" = 4, "Average" = 3, "Poor" = 2, "Never Again" = 1)
+```
+
+```{r}
+pizza_poll <- pizza_poll %>% 
+  mutate(numeric_rating = rating[answer])
+
+ratings_summary <- pizza_poll %>% 
+  group_by(place) %>% 
+  summarise(total_points = sum(numeric_rating * votes, na.rm = TRUE),
+            total_votes = sum(votes, na.rm = TRUE))
+
+ratings_summary <- ratings_summary %>% 
+  mutate(average_rating = round(total_points / total_votes,2))
+
+top_pizza_shops <- ratings_summary %>% 
+  filter(total_votes >= 15) %>% 
+  arrange(desc(average_rating)) %>% 
+  slice_head(n = 10)
+
+gt(top_pizza_shops)
+  
+```
+
+## Problem 2
+
+Null (Ho): There is no difference in mean ratings across cost of pizza
+
+Alternative (Ha): expensive pizza is more highly rated on average than cheap pizza
+
+```{r}
+#| fig-alt: This is a boxplot showing the mean and quartiles for ratings by price group.
+pizza_ratings <- pizza_ratings %>% 
+  mutate(price_group = ifelse(price_level > 1, "expensive", "cheap"))
+
+ggplot(pizza_ratings,
+       aes(x = price_group, 
+           y = rating,
+           fill = price_group)) +
+  geom_boxplot() +
+  scale_fill_brewer(palette = "Dark2") +
+  labs(title = "Critic Ratings by Pizza Price Group",
+       x = "Price Group",
+       y = "Critic Rating")
+```
+
+```{r}
+model_pizza <- t.test(rating ~ price_group,
+                      data = pizza_ratings,
+                      alternative = "greater")
+model_pizza
+```
+
+With a p-value of almost 1 here, we can see that there is no significant difference in average rating between cheap and expensive pizzas.
+
+## Problem 3
+
+```{r}
+pizza_ratings <- pizza_ratings %>%
+  rename(place = name)
+
+combined <- inner_join(ratings_summary, pizza_ratings, by = "place")
+
+gt(combined)
+```
+The majority of the restaurants present on both are cheaper options, with decent reviews, and all are location in New York (With the exception of 1 in Brooklyn). 
+
+## Problem 4
+
+Null: energy level and genre are independent.
+
+Alternative: they're not independent.
+
+```{r}
+#| fig-alt: This is a boxplot showing the mean and quartiles of song "energy" by genre
+ggplot(spotify, 
+       aes(x = genre,
+           y = energy)) +
+  geom_boxplot() +
+  labs(title = "Song Energy Levels by Genre",
+       x = "Song Energy",
+       y = "Song Genre")
+```
+
+```{r}
+spotify_anova <- aov(energy ~ genre, data = spotify)
+
+summary(spotify_anova)
+```
+
+With a p-value this small, you can pretty much guarantee that genre and energy level are not independent of each other, and that genre likely has a statistically significant effect on energy level.
+
+## Problem 5
+
+null: `energy` is independent of `tempo`
+
+alt: `energy` is not independent of `tempo`
+
+```{r}
+#| warning: false
+#| fig-alt: This is a scatterplot showing the distribution of song energy by song tempo, with a regression line laid over top
+ggplot(spotify,
+       aes(x = tempo, 
+           y = energy)) +
+  geom_point() +
+  geom_smooth(method = "lm",
+              se = FALSE) +
+  labs(title = "Distribution of Song Energy by Song Tempo",
+       x = "Song Tempo",
+       y = "Song Energy")
+```
+
+```{r}
+model2 <- lm(energy ~ tempo, 
+             data = spotify)
+
+summary(model2)
+```
+
+pvalue is large, fail to reject null - energy and tempo are independent of each other.
+
+## Problem 6
+
+```{r}
+scooby_unmask <- scooby %>% 
+  select(title, imdb, starts_with("unmask_")) %>% 
+  pivot_longer(cols = starts_with("unmask_"),
+               names_to = "unmasker",
+               values_to = "did_unmask") %>% 
+  filter(did_unmask == TRUE) %>% 
+  mutate( unmasker = str_remove(unmasker, "unmask_"),
+    unmasker = str_replace(unmasker, "daphnie", "daphne"),
+    unmasker = str_to_title(unmasker)) %>% 
+  select(title, imdb, unmasker)
+
+glimpse(scooby_unmask)
+```
+
+```{r}
+scooby_unmask %>% 
+  count(unmasker, name = "unmask_count") %>% 
+  arrange(desc(unmask_count)) %>%
+  gt()
+```
+
+## Problem 7
+
+```{r}
+scooby_sm <- scooby %>% 
+  filter(format == "TV Series")
+
+top_motives <- scooby_sm %>% 
+  count(motive, sort = TRUE) %>% 
+  slice_head(n = 3) %>% 
+  pull(motive)
+
+top_terrains <- scooby_sm %>% 
+  count(setting_terrain, sort = TRUE) %>% 
+  slice_head(n = 2) %>% 
+  pull(setting_terrain)
+
+scooby_sm <- scooby_sm %>% 
+  filter(motive %in% top_motives,
+         setting_terrain %in% top_terrains) %>% 
+  select(title, motive, setting_terrain)
+
+glimpse(scooby_sm)
+```
+
+
+## Problem 8
+
+Null: No association between motive and setting terrain
+
+Alt: There is an association
+
+```{r}
+table_sm <- table(scooby_sm$motive, scooby_sm$setting_terrain)
+
+chisq_test <- chisq.test(table_sm)
+
+chisq_test
+```
+
+p value is tiny here, so we reject Ho and conclude that motive and terrain are associated in some capacity.
+
+
+
+
+

@@ -9,8 +9,10 @@ embed-resources: true
 
 library(tidyverse)
 library(broom)
+library(readxl)
+curved <- read_csv("curved.csv")
+parenting <- read_excel("parenting.xlsx")
 ```
-
 Let's look at the `airquality` data set. First of all, are wind and temp independent?
 
 ```{r}
@@ -71,6 +73,8 @@ glimpse(airq_aug)
 
 ## Class Notes 4/9: Model Diagnostics
 
+Assumptions:
+
 - there is a linear relationship between the variables.
 - the observations are independent of each other.
 - residuals should have a normal distribution
@@ -79,7 +83,79 @@ glimpse(airq_aug)
 after making a regression model its pretty crucial to check these things, to make sure test is homoskedastic, among other things.
 
 
+```{r}
+ggplot(airq_aug, aes(x = .fitted, y = .resid)) +
+  geom_point() +
+  geom_smooth(method = "lm",
+              se = FALSE)
+```
+
+assumptions 1, 3 and, 4 fulfilled - this should be a random cloud - no major patterns.
 
 
+Lets look at `curved` now. 
+
+```{r}
+glimpse(curved)
+```
+
+```{r}
+ggplot(curved, aes(x = x,
+                   y = y)) +
+  geom_point() +
+  geom_smooth(method = "lm",
+             se = FALSE)
+```
+
+not a great model, but plot really doesnt look terrible. lets check out a residual plot:
+
+```{r}
+model1 <- lm(y ~ x,
+           data = curved)
+
+curved_aug <- augment(model1)
+
+
+ggplot(curved_aug,
+       aes(x = .fitted,
+           y = .resid)) +
+  geom_point() +
+  geom_hline(yintercept = 0)
+```
+
+## Predictions and what not:
+
+we'll use the Parenting dataset
+
+```{r}
+glimpse(parenting)
+```
+
+set aside the last 20 observations before we build our model
+
+```{r}
+parenting_new <- parenting %>% 
+  slice_tail(n = 20)
+```
+
+how is danielle's mood impacted by how her baby sleeps
+
+```{r}
+ggplot(parenting_sample,
+       aes(x = baby.sleep,
+           y = dan.grump)) +
+  geom_point()
+
+model <- lm(dan.grump ~ baby.sleep,
+            data = parenting_sample)
+```
+
+
+```{r}
+new_gump_fit <- predict(model, parenting_new)
+
+parenting_new <- parenting_new %>% 
+  mutate(dan.grump_pred = new_gump_fit)
+```
 
 
