@@ -1,0 +1,71 @@
+---
+title: "Class Notes 4.14"
+format: html
+embed-resources: true
+---
+
+Today we are looking at outliers
+
+```{r}
+#| message: false
+#| label: setup
+
+library(tidyverse)
+
+data <- read_csv("simulated_data_out.csv")
+```
+
+```{r}
+ggplot(data, 
+       aes(x = x1,
+           y = y)) +
+  geom_point()
+```
+
+outliers can fuck with your regression. lets see this
+
+```{r}
+ggplot(data, 
+       aes(x = x1,
+           y = y)) +
+  geom_point() + 
+  geom_smooth(method = "lm",
+              se = FALSE)
+```
+
+bad model - so we can filter out the outlier and then build a better model
+
+**BUT** outliers should never be deleted out of hand. they can be important
+broadly speaking, there are 3 types of outliers:
+
+- mistakes (correct or delete)
+
+- an interesting phenomenon that should be studied. observation is categorically different, and we need to know why. generally remove.
+
+- an ordinary observation that is just extremely different by random chance, should be extra careful about removing these. if you do, the model is provisional and built for statistical convenience.
+
+lets drop this outlier:
+
+```{r}
+data_sm <- data %>% 
+  filter(x1 <= 550)
+
+ggplot(data_sm,
+       aes(x = x1,
+           y = y)) +
+  geom_point() +
+  geom_smooth(method = "lm",
+              se = FALSE)
+```
+
+```{r}
+model_out <- lm(y ~ x1,
+                data = data)
+model_out
+
+model_sm <- lm(y ~ x1,
+                data = data_sm)
+model_sm
+```
+
+
