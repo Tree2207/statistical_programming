@@ -1,0 +1,46 @@
+---
+title: "Class Notes 4.16"
+format: html
+embed-resources: true
+---
+
+today we are enabling copilot
+
+```{r}
+#| message: false
+library(tidyverse)
+library(readxl)
+library(GGally)
+# load parenting data set
+
+parenting <- read_excel("parenting.xlsx")
+```
+
+Glimpse the data set
+
+```{r}
+glimpse(parenting)
+```
+
+Null: The coefficient of baby.sleep is 0 when dan.sleep is in the model. that is, the true regression equation is dan.grump = B0 + B1dan.sleep + e.
+
+Alt: the coefficient is non-zero
+
+# Plots
+
+ideally, every explanatory varaible in a regression should have a linear relationship with the response variable. a helpful function here is ggpairs
+
+```{r}
+parenting <- parenting %>% 
+  select(dan.sleep:dan.grump)
+
+GGally::ggpairs(parenting)
+```
+
+```{r}
+model <- lm(dan.grump ~ baby.sleep + dan.sleep, data = parenting)
+
+summary(model)
+```
+
+

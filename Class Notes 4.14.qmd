@@ -107,3 +107,16 @@ ggplot(data_sm_aug,
 
 Questions: are both variables necessary in this model? How do we interpret those p-values? What happens if x1 and x2 may influence one another?
 
+
+
+## Class Notes 4.16
+
+```{r}
+summary(model_2)
+```
+
+Consider the coefficient on X2, and we are sampling from a larger population and trying to evaluate these hypothesis:
+
+Null: $\beta_1 = 0$. population relationship is actually $y = \beta_0 + \beta_2x_2$
+
+Alt: $\beta_1 \ne 0$
