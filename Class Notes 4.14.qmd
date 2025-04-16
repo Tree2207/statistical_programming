@@ -1,85 +1,109 @@
 ---
-title: "Class Notes 4.14"
+title: "Class notes 4.14"
 format: html
 embed-resources: true
 ---
 
-Today we are looking at outliers
+Today we're considering outliers.
 
 ```{r}
 #| message: false
-#| label: setup
 
 library(tidyverse)
-
 data <- read_csv("simulated_data_out.csv")
 ```
 
+Look at x1 versus y to start. 
+
 ```{r}
-ggplot(data, 
-       aes(x = x1,
-           y = y)) +
+ggplot(data,
+       aes(x = x1, 
+           y = y)) + 
   geom_point()
 ```
 
-outliers can fuck with your regression. lets see this
+An outlier can mess up your regression model. Let's see this visually. 
 
 ```{r}
-ggplot(data, 
-       aes(x = x1,
-           y = y)) +
-  geom_point() + 
-  geom_smooth(method = "lm",
-              se = FALSE)
-```
-
-bad model - so we can filter out the outlier and then build a better model
-
-**BUT** outliers should never be deleted out of hand. they can be important
-broadly speaking, there are 3 types of outliers:
-
-- mistakes (correct or delete)
-
-- an interesting phenomenon that should be studied. observation is categorically different, and we need to know why. generally remove.
-
-- an ordinary observation that is just extremely different by random chance, should be extra careful about removing these. if you do, the model is provisional and built for statistical convenience.
-
-lets drop this outlier:
-
-```{r}
-data_sm <- data %>% 
-  filter(x1 <= 550)
-
-ggplot(data_sm,
-       aes(x = x1,
-           y = y)) +
+ggplot(data,
+       aes(x = x1, 
+           y = y)) + 
   geom_point() +
   geom_smooth(method = "lm",
               se = FALSE)
 ```
 
+This isn't as good a model as the one that omits the outlier. We could filter it out and then build a model that fits better. 
+
+**BUT** outliers should not be deleted out of hand. They can be important. Broadly speaking, there are three sorts of outliers:
+
+- mistakes. Either correct or delete these. But still, see all my warnings and advice about missing data. 
+
+- an interesting phenomenon that should be studied. The observation is just categorically different and we need to find out why. Generally we remove these from the modl but also discuss them. 
+
+- an ordinary observation that's just different by random chance. In general, you should be extra careful about removing these. If you do so, the model should be considered provisional, built for statistical convenience. 
+
+Let's drop this outlier and then compare the models.
+
 ```{r}
+data_sm <- data %>% 
+  filter(x1 < 400)
+
 model_out <- lm(y ~ x1,
                 data = data)
 model_out
 
-model_sm <- lm(y ~ x1,
+model_sm  <- lm(y ~ x1,
                 data = data_sm)
 model_sm
 ```
 
-its ok to build multiple models and then choose between them. **BUT** if you do this, do not do hypothesis testing, those p-values are no longer useful.
+It's ok to build multiple models and then choose between them, **BUT** if you do this, do not do hypothesis testing. Those p-values are no longer useful for that. 
 
-multiple variables:
+## Multiple explainers
+
+In the smaller set, `data_sm`, both x1 and x2 help explain y. 
 
 ```{r}
-ggplot(data_sm,
-       aes(x = x2,
-           y = y)) +
-  geom_point() + 
+ggplot(data_sm, 
+       aes(x = x2, 
+           y = y)) + 
+  geom_point() +
   geom_smooth(method = "lm",
               se = FALSE)
 ```
 
+Let's build a model that includes both. 
+
 $$y = \beta_0 + \beta_1x_1 + \beta_2x_2$$
+A one-unit increase in $x_1$ gives a $\beta_1$ increase in y. Similarly for $x_2$ and $\beta_2$. 
+
+We fit this model with very similar code as before.
+
+```{r}
+model_2 <- lm(y ~ x1 + x2,
+              data = data_sm)
+model_2
+```
+
+The equation is $y = -35.4 + 4.2x_1 - 2.7x_2$.
+
+```{r}
+summary(model_2)
+```
+
+We can make a residual plot for this as well. 
+
+```{r}
+data_sm_aug <- broom::augment(model_2)
+
+ggplot(data_sm_aug,
+       aes(x = .fitted, 
+           y = .resid)) + 
+  geom_point() +
+  geom_smooth(method = "lm",
+              se = FALSE)
+```
+
+Questions: are both variables necessary in this model? How do we interpret those p-values? What happens if x1 and x2 may influence one another?
 
