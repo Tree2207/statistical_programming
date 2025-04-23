@@ -121,4 +121,5 @@ As flipper length increases by 1 mm, bill length increases by .2673.
 As body mass increases by 1 gram, bill length decreases by .00067 mm.
 If a penguin is male, we can expect their bill to be 2.30 mm longer on average. 
 
+The body mass variable here is likely correlated with another variable, as its p-value and coefficient become essentially worthless when flipper length is added.
 

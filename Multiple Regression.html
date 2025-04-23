@@ -3430,6 +3430,7 @@ F-statistic:  94.2 on 3 and 329 DF,  p-value: &lt; 2.2e-16</code></pre>
 </div>
 <p>The equation for this model is: Bill Length = -8.075 + .2673<em>flipper_length_mm - .00067</em>body_mass_g + 2.304*sexmale. Flipper Length and sexmale are statistically significant at the 99% level, while body mass is not (p-value = 0.2852) is not significant. The adjusted <span class="math inline">\(R^2\)</span> is .4572.</p>
 <p>As flipper length increases by 1 mm, bill length increases by .2673. As body mass increases by 1 gram, bill length decreases by .00067 mm. If a penguin is male, we can expect their bill to be 2.30 mm longer on average.</p>
+<p>The body mass variable here is likely correlated with another variable, as its p-value and coefficient become essentially worthless when flipper length is added.</p>
 </section>
 
 </main>
