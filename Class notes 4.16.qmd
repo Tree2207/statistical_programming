@@ -11,6 +11,7 @@ today we are enabling copilot
 library(tidyverse)
 library(readxl)
 library(GGally)
+library(modeldata)
 # load parenting data set
 
 parenting <- read_excel("parenting.xlsx")
@@ -42,5 +43,49 @@ model <- lm(dan.grump ~ baby.sleep + dan.sleep, data = parenting)
 
 summary(model)
 ```
+
+The data is consistent with the null, so there is no evidence that  baby.sleep is related to dan.grump when dan.sleep is in the model.
+
+## Another perspective on p-values
+
+p-values are often used for variable selection. intuitively, variables with lower p-values feel like they belong in the model. 
+we've already seen that this must be done with care.
+This is called *subset selection*, choosing variables based on p-values
+
+If you do this, it is essential to not double dip, i.e. do not use for inference on the model you selected.
+
+## $R^2$ the coefficient of determination
+
+$R^2$ is the proportion of variance in the response variable that is explained by the model. It is not a good measure of how well the model fits the data. Adding more variables always reduces r^2 - look at the "better" model for parenting that just uses dan.sleep.
+
+```{r}
+model2 <- lm(dan.grump ~ dan.sleep, data = parenting)
+summary(model2)
+```
+
+## Multiple Regressions with a categorical variable
+
+Crickets Data Set
+
+```{r}
+glimpse(crickets)
+```
+
+```{r}
+#| message: false
+ggplot(crickets,
+       aes(x = temp,
+           y = rate,
+           color = species)) +
+  geom_point() +
+  geom_smooth(method = "lm",
+              se = FALSE) +
+  scale_color_brewer(palette = "Dark2")
+```
+
+assume slopes in 2 groups are equal and get 2 equations for the lines
+
+O.exclamationis, rate = B0 + B1temp + e and for O.niveus rate = (B0 + B2) +  B1temp + e, where B2 is the vertical distance between the two lines.
+
 
 

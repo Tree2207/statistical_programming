@@ -1,0 +1,35 @@
+---
+title: "Class notes 4.21"
+format: html
+embed-resources: true
+---
+
+```{r}
+#| label: setup
+#| message: false
+
+library(tidyverse)
+library(modeldata)
+```
+
+
+## Multiple regression with a categorical variable
+
+Let's revisit the `crickets` set.
+
+```{r}
+#| warning: false
+glimpse(crickets)
+
+ggplot(crickets, 
+       aes(x = temp,
+           y = rate,
+           color = species)) + 
+  geom_point() +
+  geom_smooth(method = "lm", 
+              se = FALSE) +
+  scale_color_brewer(palette = "Dark2")
+```
+
+We'll assume the slopes in the two groups are equal and get two equations for the lines. For O. exclamationis, 
+$rate = b_0 + b_1 * temp$ and for O. niveus, $rate = (b_0 + b_2) + b_1 * temp$.
