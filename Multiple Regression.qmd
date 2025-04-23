@@ -1,0 +1,124 @@
+---
+title: "Multiple Regression"
+format: html
+embed-resources: true
+---
+
+```{r}
+#| label: setup
+#| message: false
+
+library(tidyverse)
+library(modeldata)
+```
+
+## Question 1
+
+```{r}
+penguins_sm <- penguins %>% 
+  filter(!is.na(sex))
+```
+
+## Question 2
+
+```{r}
+#| fig-alt: scatter plot and regresion highlighting correlations of bill length and flipper length across sexes seperately
+#| warning: false
+#| message: false
+ggplot(penguins_sm,
+       aes(x = flipper_length_mm,
+           y = bill_length_mm,
+           color = sex)) +
+  geom_point() + 
+  geom_smooth(method = "lm",
+              se = FALSE) +
+  scale_color_brewer(palette = "Dark2") +
+  labs(
+    title = "Flipper length vs bill length",
+    x = "Flipper length (mm)",
+    y = "Bill length (mm)",
+  )
+```
+
+## Question 3
+
+```{r}
+model1 = lm(bill_length_mm ~ flipper_length_mm,
+            data = penguins_sm)
+
+summary(model1)
+```
+
+The equation for this model is: Bill Length = -7.218 + .2548*flipper_length_mm
+flipper length is a statistically significant predictor of bill length (p-value < 0.001). The $R^2$ is 0.4248, which means that 42.48% of the variability in bill length can be explained by flipper length.
+
+for each additional mm of flipper length, we expect bill length to increase by 0.2548 mm.
+
+
+## Question 4
+
+```{r}
+model2 = lm(bill_length_mm ~ flipper_length_mm + body_mass_g,
+            data = penguins_sm)
+
+summary(model2)
+```
+
+The equation for this model is: Bill Length = -3.98 + .2272*flipper_length_mm + .00055*body_mass_g
+flipper length is a statistically significant predictor of bill length (p-value < .001), but body mass is not (p-value = 0.342). The $R^2$ is 0.4246, which means that 42.46% of the variability in bill length can be explained by flipper length and body mass.
+
+For each additional mm of flipper length, we expect bill length to increase by 0.2272 mm, and for each additional gram of body mass, we expect bill length to increase by 0.00055 mm.
+
+## Question 5
+
+```{r}
+model3 = lm(bill_length_mm ~ body_mass_g + sex,
+            data = penguins_sm)
+
+summary(model3)
+```
+
+The equation for this model is: Bill Length = 2.791e+01 + 3.67e-03*body_mass_g + 1.247e+00*sexmale.
+Both body mass and sex are statistically significant at the 5% level.
+The adjusted $R^2$ is .3542.
+
+For each additional g of body weight, we can expect bill length to increase by .00367, and if the sex is male, we can expect bill length to increase by 1.247 mm.
+
+## Question 6
+
+```{r}
+#| fig-alt: scatter plot and regresion highlighting correlations of bill length and body mass across sexes seperately
+#| warning: false
+#| message: false
+ggplot(penguins_sm, aes(x = body_mass_g, 
+                        y = bill_length_mm, 
+                        color = sex)) +
+  geom_point() +
+  geom_smooth(method = "lm", 
+              se = FALSE) +
+  labs(
+    title = "Bill Length vs. Body Mass by Sex",
+    x = "Body Mass (g)",
+    y = "Bill Length (mm)",
+    color = "sex") +
+  scale_color_brewer(palette = "Dark2")
+```
+
+As body mass increases, bill length also tends to increase for both sexes. Additionally, males generally have slightly longer bills than females at the same body mass.
+
+## Question 7
+
+```{r}
+model4 = lm(bill_length_mm ~ flipper_length_mm + body_mass_g + sex,
+            data = penguins_sm)
+
+summary(model4)
+```
+The equation for this model is: Bill Length = -8.075 + .2673*flipper_length_mm - .00067*body_mass_g + 2.304*sexmale.
+Flipper Length and sexmale are statistically significant at the 99% level, while body mass is not (p-value = 0.2852) is not significant. The adjusted $R^2$ is .4572.
+
+As flipper length increases by 1 mm, bill length increases by .2673. 
+As body mass increases by 1 gram, bill length decreases by .00067 mm.
+If a penguin is male, we can expect their bill to be 2.30 mm longer on average. 
+
+
