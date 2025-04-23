@@ -87,24 +87,24 @@ For each additional g of body weight, we can expect bill length to increase by .
 ## Question 6
 
 ```{r}
-#| fig-alt: scatter plot and regresion highlighting correlations of bill length and body mass across sexes seperately
+#| fig-alt: Residual plot showing resdiuals for model3
 #| warning: false
 #| message: false
-ggplot(penguins_sm, aes(x = body_mass_g, 
-                        y = bill_length_mm, 
-                        color = sex)) +
+ggplot(data = penguins_sm, aes(x = fitted(model3),
+                               y = resid(model3),
+                               color = sex)) +
   geom_point() +
-  geom_smooth(method = "lm", 
-              se = FALSE) +
+  geom_hline(yintercept = 0, 
+             linetype = "dashed") +
   labs(
-    title = "Bill Length vs. Body Mass by Sex",
-    x = "Body Mass (g)",
-    y = "Bill Length (mm)",
+    title = "Residual Plot: Bill Length ~ Body Mass + Sex",
+    x = "Fitted Values",
+    y = "Residuals",
     color = "sex") +
   scale_color_brewer(palette = "Dark2")
 ```
 
-As body mass increases, bill length also tends to increase for both sexes. Additionally, males generally have slightly longer bills than females at the same body mass.
+No clear trend in residuals, aside from males generally having higher fitted values.
 
 ## Question 7
 
