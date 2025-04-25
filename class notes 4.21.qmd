@@ -18,7 +18,6 @@ library(modeldata)
 Let's revisit the `crickets` set.
 
 ```{r}
-#| warning: false
 glimpse(crickets)
 
 ggplot(crickets, 
@@ -33,3 +32,54 @@ ggplot(crickets,
 
 We'll assume the slopes in the two groups are equal and get two equations for the lines. For O. exclamationis, 
 $rate = b_0 + b_1 * temp$ and for O. niveus, $rate = (b_0 + b_2) + b_1 * temp$.
+
+We define the **indicator variables** `species_ON` to be 1 for O. niveus crickets and 0 otherwise. Then the model is
+
+$$rate = \beta_0 + \beta_1 (temp) + \beta_2 (species\_ON)$$
+We fit this model with R exactly as we would with quantitative variables only. 
+
+```{r}
+model <- lm(rate ~ temp + species, 
+            data = crickets)
+summary(model)
+```
+
+R does the coding of indicator variables automatically. The default is to look at the values of the categorical variable alphabetically. The first one is the **reference level**, the one that doesn't get an indicator variable.
+
+$$rate = -7.21 + 3.60 (temp) - 10.07 (species\_ON)$$
+We can do a residual plot here as well (but I won't).
+
+Question: what if we don't assume the slopes are the same??
+
+## A categorical variable with more than 2 levels
+
+Let's look at `iris` again.
+
+```{r}
+ggplot(iris, aes(x = Sepal.Width,
+                 y = Sepal.Length,
+                 color = Species)) +
+  geom_point() +
+  geom_smooth(method = "lm",
+              se = FALSE) +
+  scale_color_brewer(palette = "Dark2") 
+```
+
+Let's make a parallel-slopes model using these variables.
+
+```{r}
+model <- lm(Sepal.Length ~ Sepal.Width + Species, 
+            data = iris)
+summary(model)
+```
+
+The equation is
+
+$$length = 2.2514 + 0.8036 (width) + 1.4587 (species\_vers) + 1.9468 (species\_virg)$$
+For instance, a virginica with 3.0 sepal width is expected to have a length of 2.2514 + 0.8026(3.0) + 1.4587(0) + 1.9468(1) = `{r} 2.2514 + 0.8026 * 3.0 + 1.9468`.
+
+This model corresponds to 3 equations, one for each line in the plot, one for each level of the categorical variable. For setosa, it's $length = 2.2514 + 0.8036 (width)$. For versicolor, it's $length = 2.2514 + 0.8036 (width) + 1.4587$, that is $length = 3.7101 + 0.8036 (width)$
+
+Question: what if we want to do inference? How do we interpret these p-values?
+
+
